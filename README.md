@@ -123,6 +123,16 @@ docker compose up -d
 
 ## 💻 Usage
 
+Clone the repo: git clone <url>
+
+Setup Environment: Copy .env.example to .env and fill in your keys.
+
+Run with Docker:
+
+Bash
+docker compose up --build  #how to set up in docker
+
+
 ```bash
 # Full run (requires live OM + configured .env)
 python agent.py

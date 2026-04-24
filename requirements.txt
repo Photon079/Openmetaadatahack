@@ -4,3 +4,8 @@ slack-sdk
 google-api-python-client
 google-auth
 anthropic
+langchain
+ipython
+langgraph
+langchain-google-genai
+langchain-community

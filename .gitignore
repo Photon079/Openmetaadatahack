@@ -35,3 +35,5 @@ data/
 credentials.json
 token.json
 service_account.json
+
+agents/tem_config.py

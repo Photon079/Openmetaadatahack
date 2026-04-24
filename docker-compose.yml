@@ -1,0 +1,12 @@
+services:
+  ai-agent:
+    build: .
+    container_name: metadata_hack_agent
+    volumes:
+      - .:/app
+    # This automatically loads your local .env file into the container
+    #env_file:
+     # - .env.example
+    # Keeps the container running if it's an interactive agent
+    tty: true
+    stdin_open: true
