@@ -19,6 +19,7 @@ class Incident:
     table_name: str
     owner: Optional[str]
     domain: Optional[str]
+    tags: List[str]          # New field for governance tags
     severity: str            # P1 / P2 / P3
     failure_count: int
     latest_timestamp: int    # Unix ms of most recent failure
@@ -99,6 +100,7 @@ def aggregate(raw_results: list, om_base_url: str = "http://localhost:8585") -> 
                 "table_name": _extract_table_name(tc_fqn),
                 "owner": _extract_owner(tc),
                 "domain": _extract_domain(tc),
+                "tags": tc.get("table_tags", []),
                 "severity": assign_severity(tc),
                 "failure_count": 0,
                 "latest_timestamp": 0,

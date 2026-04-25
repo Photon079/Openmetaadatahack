@@ -28,9 +28,11 @@ SLACK_CHANNEL = os.getenv("SLACK_CHANNEL", "#data-quality")
 
 # ── AI Summarization ──────────────────────────────────────────────────────────
 ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "")
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
 
 # ── Jira (optional) ───────────────────────────────────────────────────────────
 JIRA_BASE_URL = os.getenv("JIRA_BASE_URL", "")
 JIRA_EMAIL = os.getenv("JIRA_EMAIL", "")
 JIRA_TOKEN = os.getenv("JIRA_TOKEN", "")
 JIRA_PROJECT_KEY = os.getenv("JIRA_PROJECT_KEY", "DQ")
+

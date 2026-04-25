@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DQ-Agent | Autonomous Data Quality</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="background-glow"></div>
+    
+    <nav class="navbar">
+        <div class="logo">🛡️ DQ-Agent</div>
+        <a href="#install" class="btn-primary-small">Install MCP Server</a>
+    </nav>
+
+    <header class="hero">
+        <div class="hero-content">
+            <div class="badge">OpenMetadata Hackathon 2026</div>
+            <h1>Data Quality on <span class="gradient-text">Autopilot</span>.</h1>
+            <p>Connect your OpenMetadata instance to Claude natively. Transform alert noise into actionable intelligence using LangGraph and the Model Context Protocol.</p>
+            <div class="hero-buttons">
+                <a href="#install" class="btn-primary">Get Started</a>
+                <a href="https://github.com/yourusername/dq-agent" class="btn-secondary">View Source</a>
+            </div>
+        </div>
+    </header>
+
+    <section class="features">
+        <div class="feature-card glass-card">
+            <div class="feature-icon">🧠</div>
+            <h3>LangGraph Intelligence</h3>
+            <p>Our agent doesn't just alert; it investigates. Using a 5-node AI pipeline, it classifies failures, calculates impact, and hypothesizes root causes autonomously.</p>
+        </div>
+        <div class="feature-card glass-card">
+            <div class="feature-icon">⛓️</div>
+            <h3>Deep Lineage Tracing</h3>
+            <p>By querying OpenMetadata's Lineage Graph, DQ-Agent calculates the exact downstream blast radius (Dashboards, ML Models) of every broken upstream table.</p>
+        </div>
+        <div class="feature-card glass-card">
+            <div class="feature-icon">🔌</div>
+            <h3>Native MCP Support</h3>
+            <p>No new UI to learn. Just connect the server to Claude Desktop or Cursor, and talk to your OpenMetadata instance in plain English.</p>
+        </div>
+    </section>
+
+    <section id="install" class="installation">
+        <div class="install-container glass-card">
+            <h2>Install in 1-Click</h2>
+            <p>Add this configuration to your <code>claude_desktop_config.json</code> to instantly enable DQ-Agent.</p>
+            <div class="code-block-wrapper">
+                <button class="copy-btn" id="copyBtn">Copy</button>
+                <pre><code id="configCode">{
+  "mcpServers": {
+    "DQ-Agent": {
+      "command": "/absolute/path/to/venv/bin/python",
+      "args": [
+        "/absolute/path/to/dq-agent/mcp_server.py"
+      ],
+      "env": {
+        "GEMINI_API_KEY": "your_gemini_key_here",
+        "SLACK_BOT_TOKEN": "your_slack_token_here",
+        "SHEET_ID": "your_google_sheet_id_here"
+      }
+    }
+  }
+}</code></pre>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <p>Built with ❤️ for the WeMakeDevs × OpenMetadata Hackathon</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

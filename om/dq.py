@@ -47,10 +47,27 @@ class DQFetcher:
             print(f"   [domain filter '{domain}'] → {len(test_cases)} test cases in scope")
 
         # 3. Fetch failed results for each test case in the time window
+        table_tags_cache = {}
         for tc in test_cases:
             fqn = tc.get("fullyQualifiedName")
             if not fqn:
                 continue
+
+            # Extract table FQN to fetch its tags (service.db.schema.table.testName)
+            parts = fqn.split(".")
+            if len(parts) >= 2:
+                table_fqn = ".".join(parts[:-1])
+                if table_fqn not in table_tags_cache:
+                    try:
+                        # Make API call to get tags
+                        table_data = self.client.get(f"/tables/name/{table_fqn}", params={"fields": "tags"})
+                        tags = [t.get("tagFQN", "") for t in table_data.get("tags", [])]
+                        table_tags_cache[table_fqn] = tags
+                    except Exception as e:
+                        table_tags_cache[table_fqn] = []
+                        print(f"   Warning: could not fetch tags for {table_fqn}: {e}")
+                
+                tc["table_tags"] = table_tags_cache[table_fqn]
 
             endpoint = f"/dataQuality/testCases/{fqn}/testCaseResult"
             params = {

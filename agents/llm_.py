@@ -1,8 +1,13 @@
 import os
+import sys
+
+# Add the root directory to sys.path so we can import config
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from typing import Any
 from pydantic import BaseModel
 from langchain_google_genai import ChatGoogleGenerativeAI
-from tem_config import GEMINI_API_KEY
+from config import GEMINI_API_KEY
 
 class GeminiAgent:
     def __init__(self, model_name: str = "gemini-2.5-flash"): # Recommended over flash-lite for reasoning

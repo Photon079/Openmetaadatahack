@@ -7,8 +7,14 @@ from pydantic import BaseModel, Field
 from langchain.messages import HumanMessage
 from langgraph.graph import StateGraph, START, END
 
+import time
+import json
+from om.client import OMClient
+from om.dq import DQFetcher
+from om.lineage import LineageFetcher
+
 # Import the standalone LLM Agent component
-from llm_ import GeminiAgent
+from agents.llm_ import GeminiAgent
 
 # Initialize the shared Gemini client for nodes that need reasoning
 llm_agent = GeminiAgent()
@@ -23,11 +29,19 @@ class GraphState(TypedDict):
     lineage_data: Dict[str, Any]
     blast_radius: int
     summary: str
+    run_config: Dict[str, Any] # For passing mock/domain/etc
 
 # --- 2. PYDANTIC SCHEMAS FOR LLM EXPECTED OUTPUTS ---
+class ClassifiedFailure(BaseModel):
+    table_name: str = Field(description="The name of the table")
+    fqn: str = Field(description="The fully qualified name (entityFQN) of the table")
+    test_case: str = Field(description="The name of the test case that failed")
+    severity: str = Field(description="Assigned severity: 'P1', 'P2', or 'P3'")
+    reasoning: str = Field(description="Reasoning for the assigned severity")
+
 class ClassificationOutput(BaseModel):
     max_severity: str = Field(description="The highest severity among all failures: 'P1', 'P2', 'P3', or 'NONE'")
-    classified_failures: List[Dict[str, str]] = Field(description="List of failures with assigned severities and reasoning")
+    classified_failures: List[ClassifiedFailure] = Field(description="List of failures with assigned severities and reasoning")
 
 class SummaryOutput(BaseModel):
     summary: str = Field(description="Executive summary and root-cause hypothesis")
@@ -37,14 +51,34 @@ def IngestorNode(state: GraphState):
     """Connects to OpenMetadata REST API. Fetches all failed test cases."""
     print("--- INGESTOR NODE ---")
     
-    # Mocking an OpenMetadata fetch for the workflow
-    mock_failures = [
-        {"table": "dim_users", "test": "null_check_email", "status": "failed"},
-        {"table": "fact_sales", "test": "freshness", "status": "failed"}
-    ]
+    config = state.get("run_config", {})
+    mock = config.get("mock", False)
+    domain = config.get("domain")
+    
+    if mock:
+        import os
+        path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data", "mock_failures.json")
+        try:
+            with open(path) as f:
+                raw_results = json.load(f)
+        except Exception as e:
+            raw_results = []
+            print(f"Failed to load mock data: {e}")
+    else:
+        try:
+            client = OMClient()
+            fetcher = DQFetcher(client)
+            end_ts = int(time.time() * 1000)
+            days_back = config.get("days_back", 7)
+            start_ts = end_ts - (days_back * 24 * 60 * 60 * 1000)
+            raw_results = fetcher.fetch_failed_tests(start_ts, end_ts, domain=domain or None)
+        except Exception as e:
+            print(f"Failed to fetch real data: {e}")
+            raw_results = []
+
     return {
-        "raw_failures": mock_failures,
-        "messages": ["Fetched raw failures from OpenMetadata."]
+        "raw_failures": raw_results,
+        "messages": [f"Fetched {len(raw_results)} raw failures from OpenMetadata."]
     }
 
 def ClassifierNode(state: GraphState):
@@ -55,7 +89,11 @@ def ClassifierNode(state: GraphState):
 
     system_prompt = """
     You are a Data Quality engineer. Classify the following data quality test failures.
-    P1 (Critical): Freshness failures on fact tables, revenue-related data.
+    
+    CRITICAL COMPLIANCE RULE:
+    If a table has any tags containing "PII", "Tier1", or "Sensitive" (in the `table_tags` list), you MUST escalate its failure to P1 (Critical), regardless of what the failure actually is.
+    
+    P1 (Critical): Freshness failures on fact tables, revenue-related data, or any failures on PII/Tier1 tagged tables.
     P2 (High): Null checks on important dimension tables (e.g., users, products).
     P3 (Low): Minor format issues.
     Determine the maximum severity across all failures.
@@ -78,17 +116,36 @@ def InvestigatorNode(state: GraphState):
     """Autonomously fetches downstream/upstream lineage and calculates Blast Radius."""
     print("--- INVESTIGATOR NODE (Agent) ---")
     
-    # Mocking Lineage check
-    mock_lineage = {
-        "fact_sales": {"downstream_dashboards": ["Exec_Revenue_Dash", "Marketing_ROI"]},
-        "dim_users": {"downstream_pipelines": ["daily_user_sync"]}
-    }
+    config = state.get("run_config", {})
+    mock = config.get("mock", False)
     
-    # Calculate blast radius based on downstream dependencies
-    blast_radius = sum(len(deps) for items in mock_lineage.values() for deps in items.values())
+    lineage_data = {}
+    blast_radius = 0
+    
+    if mock:
+        lineage_data = {
+            "fact_sales": {"downstream_dashboards": ["Exec_Revenue_Dash", "Marketing_ROI"]},
+            "dim_users": {"downstream_pipelines": ["daily_user_sync"]}
+        }
+        blast_radius = sum(len(deps) for items in lineage_data.values() for deps in items.values())
+    else:
+        try:
+            client = OMClient()
+            lineage_fetcher = LineageFetcher(client)
+            
+            for failure in state.get("classified_failures", []):
+                # Ensure we handle either Pydantic models or dicts depending on LLM parsing
+                failure_dict = failure.dict() if hasattr(failure, "dict") else failure
+                fqn = failure_dict.get("fqn")
+                if fqn and fqn not in lineage_data:
+                    res = lineage_fetcher.fetch_downstream_assets("table", fqn)
+                    lineage_data[fqn] = res.get("impacted_assets", [])
+                    blast_radius += res.get("blast_radius", 0)
+        except Exception as e:
+            print(f"Failed to fetch real lineage: {e}")
     
     return {
-        "lineage_data": mock_lineage,
+        "lineage_data": lineage_data,
         "blast_radius": blast_radius,
         "messages": [f"Investigated lineage. Blast radius calculated at {blast_radius} impacted assets."]
     }
@@ -120,10 +177,54 @@ def DispatcherNode(state: GraphState):
     """Executes the outputs: Writes to Google Sheets, posts to Slack, creates Jira tickets."""
     print("--- DISPATCHER NODE ---")
     
-    # Mock API calls to external services
-    print(f"\n[SLACK BLOCK KIT PREVIEW]\nAlert Level: {state.get('max_severity')}\nImpact: {state.get('blast_radius')} assets\nSummary: {state.get('summary')}\n")
+    config = state.get("run_config", {})
+    om_base_url = config.get("om_base_url", "http://localhost:8585")
+    no_slack = config.get("no_slack", False)
+    no_sheets = config.get("no_sheets", False)
+    
+    # 1. Aggregate raw failures
+    from core.aggregator import aggregate
+    report = aggregate(state.get("raw_failures", []), om_base_url=om_base_url)
+    
+    # 2. Override severity with LLM's classification
+    llm_severities = {}
+    for cf in state.get("classified_failures", []):
+        cf_dict = cf.dict() if hasattr(cf, "dict") else cf
+        fqn = cf_dict.get("fqn")
+        if fqn:
+            llm_severities[fqn] = cf_dict.get("severity")
+            
+    for incident in report.incidents:
+        if incident.table_fqn in llm_severities:
+            incident.severity = llm_severities[incident.table_fqn]
+            
+    # Recalculate max severity counts
+    report.p1_count = sum(1 for i in report.incidents if i.severity == "P1")
+    report.p2_count = sum(1 for i in report.incidents if i.severity == "P2")
+    report.p3_count = sum(1 for i in report.incidents if i.severity == "P3")
+    
+    # 3. Post to Google Sheets
+    sheet_url = "#"
+    if not no_sheets:
+        from outputs.sheets import write_report
+        try:
+            # We don't have trend in the state yet, pass empty dict
+            sheet_url = write_report(report, trend={}, ai_summary=state.get("summary", ""))
+            print(f"✅ Report written to Google Sheets: {sheet_url}")
+        except Exception as e:
+            print(f"⚠️ Failed to write to Google Sheets: {e}")
+            
+    # 4. Post to Slack
+    if not no_slack:
+        from outputs.slack import post_digest
+        try:
+            post_digest(report, trend={}, sheet_url=sheet_url, om_base_url=om_base_url, ai_summary=state.get("summary", ""))
+            print("✅ Alert posted to Slack.")
+        except Exception as e:
+            print(f"⚠️ Failed to post to Slack: {e}")
+
     return {
-        "messages": ["Dispatched alerts to Slack and Jira."]
+        "messages": ["Dispatched alerts to Slack and Sheets."]
     }
 
 # --- 4. ROUTING LOGIC ---

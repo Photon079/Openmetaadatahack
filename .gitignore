@@ -23,17 +23,21 @@ env/
 *.swp
 *.swo
 
-# OS
-.DS_Store
-Thumbs.db
-
-# Outputs / data
-outputs/
+# Data & Output Artifacts
 data/
+# outputs/ is NOT ignored as it contains source code.
 
-# Google credentials
+# Credentials and Keys
+gcp-sa.json
 credentials.json
 token.json
 service_account.json
+*.pem
 
-agents/tem_config.py
+# Binaries & Installers
+*.deb
+*.rpm
+*.tar.gz
+
+# Logs
+*.log
