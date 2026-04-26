@@ -1,178 +1,279 @@
 # DQ-Agent: Autonomous Data Quality Agent
-
-[![Watch the Demo Video](https://img.shields.io/badge/Watch-Demo%20Video-red?style=for-the-badge&logo=youtube)](YOUR_YOUTUBE_LINK_HERE)
-
-DQ-Agent is an autonomous LangGraph state machine that connects directly to OpenMetadata via the Model Context Protocol (MCP). It continuously monitors data quality execution streams, leverages OpenMetadata's lineage graph to calculate downstream blast radius, and uses advanced LLM reasoning to identify root causes and assign compliance-driven severity scores.
-
+ 
+> **WeMakeDevs × OpenMetadata Hackathon 2026** — MCP Ecosystem & AI Agents Track
+ 
+DQ-Agent is an autonomous **LangGraph state machine** that connects to any OpenMetadata instance, fetches data quality failures, traces downstream blast radius via lineage, and dispatches AI-generated executive reports to **Slack** and **Google Sheets** — all from a single command or natural language prompt via MCP.
+ 
 ---
-
-## Technical Architecture
-
-DQ-Agent bridges the gap between infrastructure state (OpenMetadata) and natural language interfaces (Claude Desktop / Cursor) by operating as a native MCP server.
-
-```mermaid
-flowchart TD
-    subgraph AI Client [MCP Host]
-        Claude[Claude Desktop / Cursor]
-        Inspector[MCP Inspector]
-    end
-
-    subgraph DQ-Agent [LangGraph Pipeline]
-        mcp[mcp_server.py]
-        
-        IngestorNode[Ingestor Node]
-        ClassifierNode[Classifier Node]
-        InvestigatorNode[Investigator Node]
-        SummarizerNode[Summarizer Node]
-        DispatcherNode[Dispatcher Node]
-        
-        mcp -->|Trigger / Query| IngestorNode
-        IngestorNode --> ClassifierNode
-        ClassifierNode --> InvestigatorNode
-        InvestigatorNode --> SummarizerNode
-        SummarizerNode --> DispatcherNode
-    end
-
-    subgraph OpenMetadata [OpenMetadata Ecosystem]
-        OM_DQ[Data Quality API]
-        OM_Lineage[Lineage API]
-        OM_Tables[Table Metadata / Tags]
-    end
-
-    subgraph Outputs [Dispatch Targets]
-        Slack[Slack Block Kit]
-        Sheets[Google Sheets]
-    end
-
-    Claude <--> mcp
-    Inspector <--> mcp
-    
-    IngestorNode -->|Fetch Failures| OM_DQ
-    ClassifierNode -->|Fetch Tags| OM_Tables
-    InvestigatorNode -->|Fetch Downstream| OM_Lineage
-    
-    DispatcherNode --> Slack
-    DispatcherNode --> Sheets
+ 
+## The Problem
+ 
+Data teams drown in raw DQ alert noise. Every test failure fires a separate Slack ping with zero context — no severity, no owner, no blast radius, no trend. Engineers waste **3–5 hours every Monday** manually compiling DQ review spreadsheets that are already stale.
+ 
+**DQ-Agent eliminates this entirely.**
+ 
+---
+ 
+## See It Working
+ 
+ 
+### Terminal — LangGraph Pipeline
 ```
-
+DQ-Agent (LangGraph) | Weekly Data Quality Report
+==================================================
+Starting LangGraph Workflow...
+--- INGESTOR NODE ---
+--- CLASSIFIER NODE ---
+--- INVESTIGATOR NODE (Agent) ---
+--- SUMMARIZER NODE ---
+--- DISPATCHER NODE ---
+✅ Report written to Google Sheets
+✅ Alert posted to Slack
+ 
+--- FINAL STATE MESSAGES ---
+Action: Fetched 13 raw failures from OpenMetadata.
+Action: Classified failures. Max severity: P1
+Action: Investigated lineage. Blast radius calculated.
+Action: Generated executive summary.
+Action: Dispatched alerts to Slack and Sheets.
+==================================================
+DQ-Agent LangGraph run complete!
+```
+ 
 ---
-
+ 
+## Architecture
+ 
+```
+OpenMetadata REST API
+        │
+        ▼
+┌─────────────────────────────────────────────────┐
+│           LangGraph State Machine               │
+│                                                 │
+│  [INGESTOR] → [CLASSIFIER] → [INVESTIGATOR]     │
+│                                   │             │
+│                              [SUMMARIZER]       │
+│                                   │             │
+│                              [DISPATCHER]       │
+└─────────────────────────────────────────────────┘
+        │                    │
+        ▼                    ▼
+   Google Sheets          Slack
+   (Styled Report)     (Block Kit Alert)
+        │
+        ▼
+   MCP Server
+   (Claude Desktop / Cursor)
+```
+ 
+### The 5-Node Pipeline
+ 
+| Node | What It Does |
+|---|---|
+| **INGESTOR** | Authenticates with OM, fetches all failed DQ test cases for the past 7 days |
+| **CLASSIFIER** | Assigns P1/P2/P3 severity; escalates to P1 if table has PII, Tier1, or Sensitive tags |
+| **INVESTIGATOR** | Queries `/api/v1/lineage` to calculate downstream blast radius per failing table |
+| **SUMMARIZER** | Sends aggregated data to Gemini LLM → generates executive summary + root cause hypothesis |
+| **DISPATCHER** | Writes styled Google Sheet + posts Slack Block Kit message with deep OM links |
+ 
+---
+ 
 ## Core Capabilities
-
-1. **Model Context Protocol (MCP) Integration**: Acts as a hostable MCP tool server. Exposes capabilities (`get_table_health`, `list_recent_failures`, `trigger_weekly_report`) directly to AI environments like Claude and Cursor.
-2. **Deep OpenMetadata Lineage Tracing**: Does not just report failures; actively queries the `/api/v1/lineage/table/name/{fqn}` endpoint to discover downstream assets (Dashboards, ML Models) impacted by upstream data issues.
-3. **Governance and PII Awareness**: Queries table-level tags (`/api/v1/tables/name/{fqn}`). Enforces strict compliance heuristics: if a failing table carries `PII`, `Tier1`, or `Sensitive` tags, the anomaly is immediately escalated to a P1 Critical incident.
-4. **LangGraph State Orchestration**: Utilizes a directed acyclic graph for pipeline execution, enabling robust context passing, state memory, and LLM-driven anomaly classification.
-5. **Rich Output Dispatching**: Leverages Google Sheets API `batchUpdate` for dynamically styled dashboard generation and Slack SDK for Block Kit severity alerts.
-
+ 
+- **MCP Integration** — Exposes `get_table_health`, `list_recent_failures`, `trigger_weekly_report` as native MCP tools usable directly from Claude Desktop or Cursor
+- **Deep Lineage Tracing** — Queries `/api/v1/lineage/table/name/{fqn}` to find every downstream Dashboard, ML Model, and Pipeline impacted by a failure
+- **Governance & PII Awareness** — Tables tagged `PII`, `Tier1`, or `Sensitive` are auto-escalated to P1 Critical regardless of test type
+- **Severity Scoring** — Schema tests → P1, data correctness tests → P2, null/uniqueness checks → P3
+- **Week-over-Week Trends** — Compares current week failures against previous week per table
+- **AI Root Cause Hypothesis** — LLM clusters failures sharing common upstream lineage ancestors and proposes probable root causes
 ---
-
-## Judging Criteria Alignment
-
-*   **Potential Impact**: Converts raw DQ noise into triaged, business-context reports. Solves "Alert Fatigue" for data engineers.
-*   **Creativity & Innovation**: First-of-its-kind combination of **LangGraph** (agentic state machine) and **MCP** (Model Context Protocol) for OpenMetadata.
-*   **Technical Excellence**: Modular 5-node pipeline, automated PII/Tier1 escalation logic, and professional multi-tab reporting.
-*   **Best Use of OpenMetadata**: Deep integration with **DQ**, **Lineage**, **Ownership**, and **Governance Tags**.
-*   **User Experience**: Seamless delivery via Slack, Google Sheets, and a natural language chat interface (Claude/Cursor).
-
----
-
+ 
 ## Setup & Installation
-
-### 1. OpenMetadata Instance Setup
-To run the DQ-Agent, you require an active OpenMetadata instance.
+ 
+### Prerequisites
+- Python 3.11+
+- Docker Desktop (for OpenMetadata)
+- A Google Cloud Service Account with Sheets API enabled
+- A Slack Bot Token with `chat:write` scope
+### Step 1 — Run OpenMetadata Locally
+ 
 ```bash
-# Download the Docker Compose file
 curl -sL https://github.com/open-metadata/OpenMetadata/releases/download/1.3.1-release/docker-compose.yml -o docker-compose.yml
-
-# Spin up the infrastructure
 docker compose up -d
-
-# The UI will be available at http://localhost:8585 (admin:admin)
+# UI available at http://localhost:8585  (admin / admin)
 ```
-
-### 2. DQ-Agent Environment Configuration
+ 
+### Step 2 — Clone and Install
+ 
 ```bash
-# Clone the repository
 git clone https://github.com/Photon079/Openmetaadatahack.git
 cd Openmetaadatahack
-
-# Create a virtual environment and activate it
 python -m venv venv
-source venv/bin/activate
-
-# Install requirements
+source venv/bin/activate        # Windows: venv\Scripts\activate
 pip install -r requirements.txt
 ```
-
-Create a `.env` file in the project root with the following variables:
-```properties
+ 
+### Step 3 — Configure Environment
+ 
+Create a `.env` file in the project root:
+ 
+```bash
+# OpenMetadata (required)
 OM_BASE_URL=http://localhost:8585
 OM_USERNAME=admin
 OM_PASSWORD=admin
-
-GEMINI_API_KEY=your_gemini_key
-
-# Optional Outputs
-SLACK_BOT_TOKEN=your_slack_bot_token
+ 
+# AI Summarization (required)
+GEMINI_API_KEY=your_gemini_api_key
+ 
+# Slack (optional — skip with --no-slack)
+SLACK_BOT_TOKEN=xoxb-your-token
 SLACK_CHANNEL=#data-alerts
+ 
+# Google Sheets (optional — skip with --no-sheets)
 SHEET_ID=your_google_sheet_id
 ```
-Ensure your `gcp-sa.json` (Google Cloud Service Account file) is placed in the project root if you intend to use Google Sheets dispatching.
-
-### 3. Model Context Protocol (MCP) Setup
-
-#### Option A: Cursor IDE (Recommended for Developers)
-1. Open Cursor Settings -> **Features** -> **MCP**.
-2. Click **+ Add New MCP Server**.
-3. Name: `DQ-Agent`
-4. Type: `command`
-5. Command: `/absolute/path/to/venv/bin/python /absolute/path/to/mcp_server.py`
-6. Open the Cursor Chat window and prompt the AI (e.g., "Check table health for dim_users").
-
-#### Option B: Claude Desktop
-Add the following to your `claude_desktop_config.json`:
+ 
+Place your `gcp-sa.json` (Google Cloud Service Account) in the project root for Sheets access.
+ 
+### Step 4 — Seed Sample Data (Recommended)
+ 
+If your OpenMetadata instance has no DQ test data, run the seed script to populate realistic failures:
+ 
+```bash
+python data/seed_om.py
+```
+ 
+This creates sample tables, test cases, and injects failure results so you can see the full report immediately.
+ 
+---
+ 
+## Usage
+ 
+### Option A — CLI (Quickest)
+ 
+```bash
+# Full run — fetch from OM, post to Slack + Sheets
+python agent.py
+ 
+# Filter by domain
+python agent.py --domain finance
+ 
+# Run with mock data (no live OM needed)
+python agent.py --mock
+ 
+# Disable external outputs (terminal only)
+python agent.py --no-slack --no-sheets
+ 
+# Mock mode with no external outputs (works offline, zero config)
+python agent.py --mock --no-slack --no-sheets
+```
+ 
+### Option B — MCP with Cursor IDE
+ 
+1. Open Cursor → Settings → Features → MCP → **+ Add New MCP Server**
+2. Name: `DQ-Agent` | Type: `command`
+3. Command: `/absolute/path/to/venv/bin/python /absolute/path/to/mcp_server.py`
+4. Open Cursor Chat and type: `"Check table health for orders_daily"`
+### Option C — MCP with Claude Desktop
+ 
+Add to `claude_desktop_config.json`:
+ 
 ```json
 {
   "mcpServers": {
     "DQ-Agent": {
       "command": "/absolute/path/to/venv/bin/python",
-      "args": [
-        "/absolute/path/to/mcp_server.py"
-      ],
+      "args": ["/absolute/path/to/mcp_server.py"],
       "env": {
-        "GEMINI_API_KEY": "your_key_here",
+        "GEMINI_API_KEY": "your_key",
         "SLACK_BOT_TOKEN": "your_token",
-        "SHEET_ID": "your_id"
+        "SHEET_ID": "your_sheet_id"
       }
     }
   }
 }
 ```
-
-#### Option C: CLI Inspector (For Testing)
+ 
+Available MCP tools:
+- `get_table_health` — returns health status for a specific table FQN
+- `list_recent_failures` — lists all DQ failures from the past 7 days
+- `trigger_weekly_report` — runs the full LangGraph pipeline and dispatches outputs
+### Option D — MCP Inspector (Testing)
+ 
 ```bash
 npx -y @modelcontextprotocol/inspector python mcp_server.py
 ```
-
-### 4. Running the Agent Manually (CLI)
-If you don't want to use MCP, you can trigger the agent manually from your terminal to generate reports.
-
-```bash
-# Run a full check against your live OpenMetadata instance
-python agent.py
-
-# Run an offline test with mock data (no live OM needed)
-python agent.py --mock
-
-# Filter the report for a specific domain (e.g., "finance")
-python agent.py --domain finance
-
-# Disable external dispatching (Slack/Sheets)
-python agent.py --no-slack --no-sheets
-```
-
+ 
 ---
-
-## License & Ownership
-All architectural patterns and code are provided as-is under the MIT License.
+ 
+## OpenMetadata APIs Used
+ 
+| Endpoint | Purpose |
+|---|---|
+| `POST /api/v1/users/login` | Authentication |
+| `GET /api/v1/dataQuality/testCases/testCaseResults` | Fetch failed test results |
+| `GET /api/v1/dataQuality/testCases` | Get test case types for severity scoring |
+| `GET /api/v1/tables/name/{fqn}` | Fetch owner, domain, tags per table |
+| `GET /api/v1/lineage/table/name/{fqn}` | Downstream lineage for blast radius |
+| `GET /api/v1/domains` | Domain filtering |
+| `GET /api/v1/users` | Map owner emails to Slack handles |
+ 
+---
+ 
+## Project Structure
+ 
+```
+dq-agent/
+├── agent.py              # CLI entry point (LangGraph trigger)
+├── mcp_server.py         # MCP tool server (Claude/Cursor integration)
+├── config.py             # Environment variable loading
+├── requirements.txt
+├── .env.example
+│
+├── om/                   # OpenMetadata API module
+│   ├── client.py         # Auth + HTTP client
+│   ├── dq.py             # Fetch test cases and results
+│   ├── entities.py       # Fetch owners, domains, tags
+│   └── lineage.py        # Downstream lineage traversal
+│
+├── core/                 # Business logic
+│   ├── models.py         # Pydantic data models
+│   ├── aggregator.py     # Deduplicate + group failures
+│   ├── scorer.py         # P1/P2/P3 severity assignment
+│   └── trend.py          # Week-over-week comparison
+│
+├── agents/
+│   └── state_graph.py    # LangGraph 5-node DAG definition
+│
+├── ai/
+│   └── summarizer.py     # Gemini LLM summarization
+│
+├── outputs/
+│   ├── sheets.py         # Google Sheets multi-tab writer
+│   └── slack.py          # Slack Block Kit dispatcher
+│
+└── data/
+    └── seed_om.py        # Populate fresh OM with sample DQ data
+```
+ 
+---
+ 
+## Judging Criteria — How We Address Each
+ 
+| Criterion | How DQ-Agent Delivers |
+|---|---|
+| **Potential Impact** | Eliminates 3–5 hrs/week of manual DQ reporting for every data team |
+| **Creativity & Innovation** | First combination of LangGraph agentic pipeline + MCP server for OpenMetadata |
+| **Technical Excellence** | Modular 5-node DAG, PII/Tier1 auto-escalation, multi-tab styled Sheet output |
+| **Best Use of OpenMetadata** | Uses DQ, Lineage, Ownership, Tags, and Domains APIs — not just one endpoint |
+| **User Experience** | Works via CLI, Slack, Google Sheets, Claude Desktop, and Cursor — zero manual steps |
+| **Presentation Quality** | Live working demo, clean README, deployed landing page |
+ 
+---
+ 
+## License
+ 
+MIT License — All code and architecture © Team DQ-Agent, 2026
+ 
