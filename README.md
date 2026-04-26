@@ -67,7 +67,7 @@ flowchart TD
 
 ---
 
-## 🏆 Judge's Cheat Sheet: Why DQ-Agent?
+## Judging Criteria Alignment
 
 *   **Potential Impact**: Converts raw DQ noise into triaged, business-context reports. Solves "Alert Fatigue" for data engineers.
 *   **Creativity & Innovation**: First-of-its-kind combination of **LangGraph** (agentic state machine) and **MCP** (Model Context Protocol) for OpenMetadata.
