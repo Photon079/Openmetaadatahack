@@ -105,28 +105,28 @@
             <div class="arch-steps">
                 <div class="arch-step glass-card">
                     <div class="step-num">01</div>
-                    <h4>Ingest</h4>
-                    <p>Fetch Data Quality failures from the OpenMetadata API.</p>
+                    <h4>Ingestor</h4>
+                    <p>Fetches real-time Data Quality execution streams from OpenMetadata REST endpoints.</p>
                 </div>
                 <div class="arch-step glass-card">
                     <div class="step-num">02</div>
-                    <h4>Govern</h4>
-                    <p>Extract table-level governance tags (PII, Tier1).</p>
+                    <h4>Classifier</h4>
+                    <p>Uses LLM reasoning to assign P1-P3 severity based on governance tags (PII/Tier1).</p>
                 </div>
                 <div class="arch-step glass-card">
                     <div class="step-num">03</div>
-                    <h4>Trace</h4>
-                    <p>Calculate the downstream lineage blast radius.</p>
+                    <h4>Investigator</h4>
+                    <p>Traverses the OpenMetadata Lineage Graph to calculate downstream blast radius.</p>
                 </div>
                 <div class="arch-step glass-card">
                     <div class="step-num">04</div>
-                    <h4>Synthesize</h4>
-                    <p>LLM formulates a root-cause hypothesis.</p>
+                    <h4>Summarizer</h4>
+                    <p>Synthesizes technical failures into executive root-cause hypotheses using Gemini Pro.</p>
                 </div>
                 <div class="arch-step glass-card">
                     <div class="step-num">05</div>
-                    <h4>Dispatch</h4>
-                    <p>Deliver payload to Slack, Sheets, or MCP client.</p>
+                    <h4>Dispatcher</h4>
+                    <p>Delivers multi-tab Sheets reports and Slack Block Kit alerts to the team.</p>
                 </div>
             </div>
         </div>

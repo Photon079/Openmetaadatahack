@@ -1,5 +1,6 @@
 # DQ-Agent: Autonomous Data Quality Agent
 
+[![Watch the Demo Video](https://img.shields.io/badge/Watch-Demo%20Video-red?style=for-the-badge&logo=youtube)](YOUR_YOUTUBE_LINK_HERE)
 
 DQ-Agent is an autonomous LangGraph state machine that connects directly to OpenMetadata via the Model Context Protocol (MCP). It continuously monitors data quality execution streams, leverages OpenMetadata's lineage graph to calculate downstream blast radius, and uses advanced LLM reasoning to identify root causes and assign compliance-driven severity scores.
 
@@ -63,6 +64,16 @@ flowchart TD
 3. **Governance and PII Awareness**: Queries table-level tags (`/api/v1/tables/name/{fqn}`). Enforces strict compliance heuristics: if a failing table carries `PII`, `Tier1`, or `Sensitive` tags, the anomaly is immediately escalated to a P1 Critical incident.
 4. **LangGraph State Orchestration**: Utilizes a directed acyclic graph for pipeline execution, enabling robust context passing, state memory, and LLM-driven anomaly classification.
 5. **Rich Output Dispatching**: Leverages Google Sheets API `batchUpdate` for dynamically styled dashboard generation and Slack SDK for Block Kit severity alerts.
+
+---
+
+## 🏆 Judge's Cheat Sheet: Why DQ-Agent?
+
+*   **Potential Impact**: Converts raw DQ noise into triaged, business-context reports. Solves "Alert Fatigue" for data engineers.
+*   **Creativity & Innovation**: First-of-its-kind combination of **LangGraph** (agentic state machine) and **MCP** (Model Context Protocol) for OpenMetadata.
+*   **Technical Excellence**: Modular 5-node pipeline, automated PII/Tier1 escalation logic, and professional multi-tab reporting.
+*   **Best Use of OpenMetadata**: Deep integration with **DQ**, **Lineage**, **Ownership**, and **Governance Tags**.
+*   **User Experience**: Seamless delivery via Slack, Google Sheets, and a natural language chat interface (Claude/Cursor).
 
 ---
 
@@ -160,17 +171,6 @@ python agent.py --domain finance
 # Disable external dispatching (Slack/Sheets)
 python agent.py --no-slack --no-sheets
 ```
-
-### 5. Testing & Verification
-Once installed, you can verify the system is working properly without needing to spin up a live OpenMetadata instance.
-
-Run the mock test suite:
-```bash
-python agent.py --mock --no-slack --no-sheets
-```
-
-**Expected Output:**
-You should see the LangGraph workflow execute in your terminal, culminating in a `Final State` printout showing the AI's hypothesized root cause for the mocked failure events, demonstrating that the LLM and Graph logic are functioning correctly.
 
 ---
 

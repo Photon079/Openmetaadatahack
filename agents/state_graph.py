@@ -123,11 +123,17 @@ def InvestigatorNode(state: GraphState):
     blast_radius = 0
     
     if mock:
+        # Match keys to the mock_failures.json FQNs (or their parent tables)
         lineage_data = {
-            "fact_sales": {"downstream_dashboards": ["Exec_Revenue_Dash", "Marketing_ROI"]},
-            "dim_users": {"downstream_pipelines": ["daily_user_sync"]}
+            "sample_ecommerce.ecommerce_db.public.orders_daily": [
+                {"name": "Exec_Revenue_Dash", "type": "dashboard", "fqn": "dash.exec_revenue"},
+                {"name": "Marketing_ROI", "type": "dashboard", "fqn": "dash.marketing_roi"}
+            ],
+            "sample_ecommerce.ecommerce_db.public.users": [
+                {"name": "daily_user_sync", "type": "pipeline", "fqn": "pipe.user_sync"}
+            ]
         }
-        blast_radius = sum(len(deps) for items in lineage_data.values() for deps in items.values())
+        blast_radius = sum(len(assets) for assets in lineage_data.values())
     else:
         try:
             client = OMClient()
