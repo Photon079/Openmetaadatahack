@@ -1,6 +1,5 @@
 # DQ-Agent: Autonomous Data Quality Agent
 
-**WeMakeDevs x OpenMetadata Hackathon 2026**
 
 DQ-Agent is an autonomous LangGraph state machine that connects directly to OpenMetadata via the Model Context Protocol (MCP). It continuously monitors data quality execution streams, leverages OpenMetadata's lineage graph to calculate downstream blast radius, and uses advanced LLM reasoning to identify root causes and assign compliance-driven severity scores.
 
@@ -84,8 +83,8 @@ docker compose up -d
 ### 2. DQ-Agent Environment Configuration
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/dq-agent.git
-cd dq-agent
+git clone https://github.com/Photon079/Openmetaadatahack.git
+cd Openmetaadatahack
 
 # Create a virtual environment and activate it
 python -m venv venv
@@ -145,7 +144,35 @@ Add the following to your `claude_desktop_config.json`:
 npx -y @modelcontextprotocol/inspector python mcp_server.py
 ```
 
+### 4. Running the Agent Manually (CLI)
+If you don't want to use MCP, you can trigger the agent manually from your terminal to generate reports.
+
+```bash
+# Run a full check against your live OpenMetadata instance
+python agent.py
+
+# Run an offline test with mock data (no live OM needed)
+python agent.py --mock
+
+# Filter the report for a specific domain (e.g., "finance")
+python agent.py --domain finance
+
+# Disable external dispatching (Slack/Sheets)
+python agent.py --no-slack --no-sheets
+```
+
+### 5. Testing & Verification
+Once installed, you can verify the system is working properly without needing to spin up a live OpenMetadata instance.
+
+Run the mock test suite:
+```bash
+python agent.py --mock --no-slack --no-sheets
+```
+
+**Expected Output:**
+You should see the LangGraph workflow execute in your terminal, culminating in a `Final State` printout showing the AI's hypothesized root cause for the mocked failure events, demonstrating that the LLM and Graph logic are functioning correctly.
+
 ---
 
 ## License & Ownership
-Developed for the WeMakeDevs × OpenMetadata Hackathon 2026. All architectural patterns and code are provided as-is.
+All architectural patterns and code are provided as-is under the MIT License.

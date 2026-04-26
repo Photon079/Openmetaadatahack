@@ -26,12 +26,12 @@ def write_report(report, trend, ai_summary):
     
     # Prepare Data
     values = [
-        ["🛡️ DQ-Agent Weekly Report", "", "", "", "", "", ""],
+        ["DQ-Agent Weekly Report", "", "", "", "", "", ""],
         ["Total Failures", str(report.total_failures), "P1 Critical", str(report.p1_count), "", "", ""],
         ["Most Impacted Domain", report.most_impacted_domain or "N/A", "P2 High", str(report.p2_count), "", "", ""],
         ["", "", "P3 Low", str(report.p3_count), "", "", ""],
         ["", "", "", "", "", "", ""],
-        ["🤖 AI Executive Summary", "", "", "", "", "", ""],
+        ["AI Executive Summary", "", "", "", "", "", ""],
         [ai_summary, "", "", "", "", "", ""],
         ["", "", "", "", "", "", ""],
         ["Table FQN", "Test Case", "Severity", "Failure Count", "Tags", "Owner", "Domain"]

@@ -6,6 +6,8 @@
     --text-secondary: #9ca3af;
     --glass-bg: rgba(255, 255, 255, 0.03);
     --glass-border: rgba(255, 255, 255, 0.08);
+    --success: #10b981;
+    --error: #ef4444;
 }
 
 * {
@@ -73,6 +75,30 @@ body {
     font-size: 0.85rem;
     font-weight: 600;
     margin-bottom: 24px;
+}
+
+.section-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 80px 5%;
+}
+
+.section-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin-bottom: 16px;
+    text-align: center;
+}
+
+.section-subtitle {
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+    margin-bottom: 48px;
+}
+
+.text-center {
+    text-align: center;
 }
 
 /* Buttons */
@@ -171,19 +197,177 @@ body {
     border-color: rgba(124, 58, 237, 0.4);
 }
 
-.feature-icon {
-    font-size: 2.5rem;
-    margin-bottom: 16px;
-}
-
 .feature-card h3 {
     font-size: 1.25rem;
     margin-bottom: 12px;
+    color: #a78bfa;
 }
 
 .feature-card p {
     color: var(--text-secondary);
     font-size: 0.95rem;
+}
+
+/* Problem vs Solution */
+.comparison-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+    margin-top: 48px;
+}
+
+@media (max-width: 768px) {
+    .comparison-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.comparison-card {
+    padding: 40px;
+    position: relative;
+    overflow: hidden;
+}
+
+.comparison-card.negative {
+    border-top: 4px solid var(--error);
+}
+
+.comparison-card.positive {
+    border-top: 4px solid var(--success);
+}
+
+.status-badge {
+    position: absolute;
+    top: 24px;
+    right: 24px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 12px;
+    text-transform: uppercase;
+}
+
+.status-badge.error {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--error);
+}
+
+.status-badge.success {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--success);
+}
+
+.comparison-card h3 {
+    font-size: 1.5rem;
+    margin-bottom: 24px;
+}
+
+.check-list {
+    list-style: none;
+}
+
+.check-list li {
+    position: relative;
+    padding-left: 28px;
+    margin-bottom: 16px;
+    color: var(--text-secondary);
+}
+
+.check-list li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 6px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+}
+
+.check-list li.cross::before {
+    background-color: rgba(239, 68, 68, 0.2);
+    border: 2px solid var(--error);
+}
+
+.check-list li.check::before {
+    background-color: rgba(16, 185, 129, 0.2);
+    border: 2px solid var(--success);
+}
+
+/* Use Cases */
+.use-cases-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 32px;
+    margin-top: 48px;
+}
+
+.use-case-card {
+    padding: 32px;
+    background: rgba(255, 255, 255, 0.02);
+    border-left: 4px solid var(--primary);
+    border-radius: 0 12px 12px 0;
+}
+
+.use-case-header {
+    margin-bottom: 16px;
+}
+
+.role-badge {
+    background: rgba(124, 58, 237, 0.2);
+    color: #c4b5fd;
+    padding: 4px 12px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.use-case-card h3 {
+    font-size: 1.25rem;
+    margin-bottom: 12px;
+}
+
+.use-case-card p {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+}
+
+/* Architecture Flow */
+.arch-steps {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 16px;
+    margin-top: 48px;
+}
+
+.arch-step {
+    flex: 1;
+    min-width: 200px;
+    padding: 24px;
+    text-align: left;
+    position: relative;
+    border-top: 2px solid rgba(124, 58, 237, 0.5);
+}
+
+.step-num {
+    font-size: 2rem;
+    font-weight: 800;
+    color: rgba(255, 255, 255, 0.1);
+    position: absolute;
+    top: 16px;
+    right: 24px;
+}
+
+.arch-step h4 {
+    font-size: 1.1rem;
+    margin-bottom: 8px;
+    color: #a78bfa;
+}
+
+.arch-step p {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
 }
 
 /* Installation Section */

@@ -11,43 +11,130 @@
     <div class="background-glow"></div>
     
     <nav class="navbar">
-        <div class="logo">🛡️ DQ-Agent</div>
+        <div class="logo">DQ-Agent</div>
         <a href="#install" class="btn-primary-small">Install MCP Server</a>
     </nav>
 
     <header class="hero">
         <div class="hero-content">
-            <div class="badge">OpenMetadata Hackathon 2026</div>
             <h1>Data Quality on <span class="gradient-text">Autopilot</span>.</h1>
             <p>Connect your OpenMetadata instance to Claude natively. Transform alert noise into actionable intelligence using LangGraph and the Model Context Protocol.</p>
             <div class="hero-buttons">
                 <a href="#install" class="btn-primary">Get Started</a>
-                <a href="https://github.com/yourusername/dq-agent" class="btn-secondary">View Source</a>
+                <a href="https://github.com/Photon079/Openmetaadatahack" class="btn-secondary">View Source</a>
             </div>
         </div>
     </header>
 
     <section class="features">
         <div class="feature-card glass-card">
-            <div class="feature-icon">🧠</div>
             <h3>LangGraph Intelligence</h3>
             <p>Our agent doesn't just alert; it investigates. Using a 5-node AI pipeline, it classifies failures, calculates impact, and hypothesizes root causes autonomously.</p>
         </div>
         <div class="feature-card glass-card">
-            <div class="feature-icon">⛓️</div>
             <h3>Deep Lineage Tracing</h3>
             <p>By querying OpenMetadata's Lineage Graph, DQ-Agent calculates the exact downstream blast radius (Dashboards, ML Models) of every broken upstream table.</p>
         </div>
         <div class="feature-card glass-card">
-            <div class="feature-icon">🔌</div>
             <h3>Native MCP Support</h3>
             <p>No new UI to learn. Just connect the server to Claude Desktop or Cursor, and talk to your OpenMetadata instance in plain English.</p>
         </div>
     </section>
 
+    <section class="problem-solution">
+        <div class="section-container">
+            <h2 class="section-title">The Data Engineering Bottleneck</h2>
+            <div class="comparison-grid">
+                <div class="comparison-card glass-card negative">
+                    <div class="status-badge error">Status Quo</div>
+                    <h3>Alert Fatigue</h3>
+                    <ul class="check-list">
+                        <li class="cross">Data engineers drown in hundreds of raw JSON alerts.</li>
+                        <li class="cross">No context on upstream dependencies or downstream impact.</li>
+                        <li class="cross">Business users submit Jira tickets and wait days for answers.</li>
+                        <li class="cross">Critical PII failures get lost in the noise of minor schema updates.</li>
+                    </ul>
+                </div>
+                <div class="comparison-card glass-card positive">
+                    <div class="status-badge success">With DQ-Agent</div>
+                    <h3>Actionable Intelligence</h3>
+                    <ul class="check-list">
+                        <li class="check">AI automatically investigates failures and calculates blast radius.</li>
+                        <li class="check">Engineers receive a triaged, root-cause analyzed report via Slack.</li>
+                        <li class="check">Non-technical users can query OpenMetadata in plain English via Claude.</li>
+                        <li class="check">PII and Tier-1 anomalies are automatically escalated to Critical priority.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="use-cases">
+        <div class="section-container">
+            <h2 class="section-title">Purpose-Built for the Entire Data Team</h2>
+            <div class="use-cases-grid">
+                <div class="use-case-card">
+                    <div class="use-case-header">
+                        <span class="role-badge">Executive & Business</span>
+                    </div>
+                    <h3>Natural Language Monitoring</h3>
+                    <p>Executives no longer need to write SQL or navigate complex catalogs. Simply ask Claude, "Is the sales dashboard healthy?" and the agent will trace the lineage to find upstream ETL failures and explain them in plain English.</p>
+                </div>
+                <div class="use-case-card">
+                    <div class="use-case-header">
+                        <span class="role-badge">Data Engineering</span>
+                    </div>
+                    <h3>Automated Triage</h3>
+                    <p>Instead of manually parsing logs, engineers wake up to a beautifully formatted Slack message and Google Sheet. The LangGraph pipeline has already identified the failing test, traced the root cause, and tagged the responsible owner.</p>
+                </div>
+                <div class="use-case-card">
+                    <div class="use-case-header">
+                        <span class="role-badge">Governance & Security</span>
+                    </div>
+                    <h3>Compliance Escalation</h3>
+                    <p>The agent is deeply integrated with OpenMetadata's tagging system. If a null-check fails on a table tagged with PII or Tier1, the agent overrides standard scoring and immediately escalates the incident to a P1 Critical anomaly.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="architecture">
+        <div class="section-container text-center">
+            <h2 class="section-title">How It Works</h2>
+            <p class="section-subtitle">A robust, 5-step LangGraph state machine powers the backend.</p>
+            <div class="arch-steps">
+                <div class="arch-step glass-card">
+                    <div class="step-num">01</div>
+                    <h4>Ingest</h4>
+                    <p>Fetch Data Quality failures from the OpenMetadata API.</p>
+                </div>
+                <div class="arch-step glass-card">
+                    <div class="step-num">02</div>
+                    <h4>Govern</h4>
+                    <p>Extract table-level governance tags (PII, Tier1).</p>
+                </div>
+                <div class="arch-step glass-card">
+                    <div class="step-num">03</div>
+                    <h4>Trace</h4>
+                    <p>Calculate the downstream lineage blast radius.</p>
+                </div>
+                <div class="arch-step glass-card">
+                    <div class="step-num">04</div>
+                    <h4>Synthesize</h4>
+                    <p>LLM formulates a root-cause hypothesis.</p>
+                </div>
+                <div class="arch-step glass-card">
+                    <div class="step-num">05</div>
+                    <h4>Dispatch</h4>
+                    <p>Deliver payload to Slack, Sheets, or MCP client.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <section id="install" class="installation">
         <div class="install-container glass-card">
-            <h2>Install in 1-Click</h2>
+            <h2>Install via MCP</h2>
             <p>Add this configuration to your <code>claude_desktop_config.json</code> to instantly enable DQ-Agent.</p>
             <div class="code-block-wrapper">
                 <button class="copy-btn" id="copyBtn">Copy</button>
@@ -70,8 +157,25 @@
         </div>
     </section>
 
+    <section id="cli" class="installation" style="padding-top: 0;">
+        <div class="install-container glass-card">
+            <h2>Run Manually (CLI)</h2>
+            <p>Don't want to use MCP? You can trigger reports manually from your terminal.</p>
+            <div class="code-block-wrapper">
+                <pre><code style="color: #a78bfa;"># Run a full check against your live OpenMetadata instance</code>
+<code>python agent.py</code>
+
+<code style="color: #a78bfa;"># Run an offline test with mock data (no live OM needed)</code>
+<code>python agent.py --mock</code>
+
+<code style="color: #a78bfa;"># Filter the report for a specific domain</code>
+<code>python agent.py --domain finance</code></pre>
+            </div>
+        </div>
+    </section>
+
     <footer>
-        <p>Built with ❤️ for the WeMakeDevs × OpenMetadata Hackathon</p>
+        <p>Powered by OpenMetadata & LangGraph</p>
     </footer>
 
     <script src="script.js"></script>

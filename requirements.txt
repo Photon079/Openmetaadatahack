@@ -8,4 +8,5 @@ langchain
 ipython
 langgraph
 langchain-google-genai
-langchain-communitymcp
+langchain-community
+mcp[cli]

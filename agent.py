@@ -32,7 +32,7 @@ def main():
     args = parse_args()
 
     print("\n" + "═" * 60)
-    print("  🛡️  DQ-Agent (LangGraph)  |  Weekly Data Quality Report")
+    print("  DQ-Agent (LangGraph)  |  Weekly Data Quality Report")
     print("═" * 60 + "\n")
 
     from langchain.messages import HumanMessage
@@ -70,7 +70,7 @@ def main():
                 print(f"Action: {msg}")
                 
         print("\n" + "═" * 60)
-        print("✅  DQ-Agent LangGraph run complete!")
+        print("  DQ-Agent LangGraph run complete!")
         print("═" * 60 + "\n")
                 
     except Exception as e:

@@ -14,8 +14,8 @@ def post_digest(report, trend, sheet_url, om_base_url, ai_summary):
             "type": "header",
             "text": {
                 "type": "plain_text",
-                "text": "🛡️ Weekly Data Quality Report",
-                "emoji": True
+                "text": "Weekly Data Quality Report",
+                "emoji": False
             }
         },
         {
@@ -32,7 +32,7 @@ def post_digest(report, trend, sheet_url, om_base_url, ai_summary):
             "type": "section",
             "text": {
                 "type": "mrkdwn",
-                "text": f"*🤖 AI Executive Summary:*\n>{ai_summary}"
+                "text": f"*AI Executive Summary:*\n>{ai_summary}"
             }
         })
         
@@ -41,7 +41,7 @@ def post_digest(report, trend, sheet_url, om_base_url, ai_summary):
             "type": "section",
             "text": {
                 "type": "mrkdwn",
-                "text": f"📊 <{sheet_url}|View the full Google Sheets Report>"
+                "text": f"<{sheet_url}|View the full Google Sheets Report>"
             }
         })
 
